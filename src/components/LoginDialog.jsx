@@ -19,6 +19,17 @@ const LoginDialog = ({ open, onClose, onLogin, onRegister }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
+
+    if (isRegistering && form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    if (isRegistering && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError('Enter a valid email address.');
+      return;
+    }
+
     setPending(true);
     try {
       const user = isRegistering ? await onRegister(form) : await onLogin({ email: form.email, password: form.password });
@@ -37,7 +48,7 @@ const LoginDialog = ({ open, onClose, onLogin, onRegister }) => {
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="xs">
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <DialogTitle>{isRegistering ? 'Create your Zave account' : 'Welcome back to Zave'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
@@ -66,7 +77,7 @@ const LoginDialog = ({ open, onClose, onLogin, onRegister }) => {
               value={form.password}
               onChange={(event) => setForm({ ...form, password: event.target.value })}
               required
-              inputProps={{ minLength: 8 }}
+              error={isRegistering && form.password.length > 0 && form.password.length < 8}
               helperText={isRegistering ? 'Use at least 8 characters.' : undefined}
               fullWidth
             />
