@@ -1,0 +1,80 @@
+.leaderboard-tab {
+  background: linear-gradient(180deg, #0b1220 0%, #0f1724 100%);
+  border-radius: 16px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #e6eef8;
+  box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+}
+
+.leaderboard-tab h3 {
+  margin: 0 0 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.leaderboard-tab ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.leaderboard-tab li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  font-weight: 600;
+  color: #e6eef8;
+}
+
+.leaderboard-tab li .rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #111827, #0b1220);
+  color: #fff;
+  font-size: 0.9rem;
+  margin-right: 0.75rem;
+  box-shadow: 0 4px 12px rgba(2,6,23,0.6) inset;
+}
+
+.leaderboard-tab li .name-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.leaderboard-tab li.me {
+  background: linear-gradient(90deg, rgba(99,102,241,0.14), rgba(34,197,94,0.06));
+  border: 1px solid rgba(99,102,241,0.18);
+  color: #e6eef8;
+  position: relative;
+}
+
+.leaderboard-tab li.me .rank {
+  background: linear-gradient(90deg, #6b21a8, #2563eb);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(99,102,241,0.18);
+}
+
+/* Accent styles for top ranks */
+.leaderboard-tab li.rank-1 .rank { background: linear-gradient(90deg,#ffd166,#ff9f1c); color:#1a1a1a; }
+.leaderboard-tab li.rank-2 .rank { background: linear-gradient(90deg,#e0e7ff,#c7d2fe); color:#0f172a; }
+.leaderboard-tab li.rank-3 .rank { background: linear-gradient(90deg,#fde68a,#fca5a5); color:#0f172a; }
+
+@media (max-width: 640px) {
+  .leaderboard-tab { padding: 0.75rem; }
+  .leaderboard-tab li { padding: 0.7rem; }
+  .leaderboard-tab li .rank { width: 30px; height: 30px; font-size: 0.85rem; }
+}

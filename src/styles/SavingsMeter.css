@@ -1,0 +1,33 @@
+.savings-meter {
+  background: #f0fff4;
+  border: 1px solid #38a169;
+  border-radius: 8px;
+  padding: 1rem 2rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 8px rgba(56,161,105,0.08);
+}
+.savings-labels {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.savings-bar-bg {
+  background: #e6fffa;
+  border-radius: 8px;
+  height: 18px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+.savings-bar {
+  background: #38a169;
+  height: 100%;
+  border-radius: 8px 0 0 8px;
+  transition: width 0.4s;
+}
+.savings-percent {
+  text-align: right;
+  font-size: 0.95rem;
+  color: #276749;
+  font-weight: 600;
+}
