@@ -1,15 +1,27 @@
 const tokenKey = 'zave-auth-token';
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
 const request = async (path, options = {}) => {
   const token = localStorage.getItem(tokenKey);
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  let response;
+  try {
+    response = await fetch(`${apiBaseUrl}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new Error('Cannot reach the authentication server. Check that the backend is deployed and VITE_API_BASE_URL is configured.');
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('The authentication API is not available on this deployment. Deploy the backend and configure VITE_API_BASE_URL.');
+  }
+
   const payload = await response.json();
   if (!response.ok) throw new Error(payload.message || 'Request failed.');
   return payload;
