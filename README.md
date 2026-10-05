@@ -2,16 +2,12 @@
 
 ## Local development
 
-Run the frontend and authentication API in separate terminals:
-
 ```bash
-npm run server
-npm run dev -- --host localhost --port 5174
+npm install
+npm run dev
 ```
 
-Open `http://localhost:5174/`. Select the profile button in the title bar to
-create an account or log in. User records are stored locally in
-`data/users.json`, with passwords hashed using Node's `scrypt` implementation.
+Open the local URL printed by Vite to use the app.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

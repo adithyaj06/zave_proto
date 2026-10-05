@@ -3,10 +3,10 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import '../styles/Header.css';
-import ProfileButton from './ProfileButton';
 
-const Header = ({ themeMode, onThemeChange, user, onProfileClick }) => {
+const Header = ({ themeMode, onThemeChange }) => {
   const today = new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
     month: 'long',
@@ -33,7 +33,9 @@ const Header = ({ themeMode, onThemeChange, user, onProfileClick }) => {
           </ToggleButton>
         </ToggleButtonGroup>
       </div>
-    <ProfileButton themeMode={themeMode} user={user} onClick={onProfileClick} />
+      <button className="profile-btn" type="button" aria-label="Log out" title="Log out">
+        <ArrowForwardIcon />
+      </button>
     </header>
   );
 };

@@ -25,7 +25,7 @@ import ExpensePieChart from '../components/ExpensePieChart';
  * - `onAddExpense`: callback to add an expense
  * - `gamification`, `points`, `level`, `xpToNextLevel`, `totalSavedAmount`: summary values
  */
-const DashboardPage = ({ user, goal, goals = [], expenses, gamification, points, level, xpToNextLevel, leaderboardEntries = [] }) => {
+const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level, xpToNextLevel, leaderboardEntries = [] }) => {
   // Local UI state: which category is selected for charts/bars
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [timeRange, setTimeRange] = useState('month');
@@ -87,7 +87,7 @@ const DashboardPage = ({ user, goal, goals = [], expenses, gamification, points,
       <Card elevation={0} sx={{ mb: 3, borderRadius: 4, overflow: 'hidden', width: '100%', bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <Typography variant="h5" fontWeight={300} sx={{ mb: 3 }}>
-            {greeting}, {user?.name || 'there'}
+            {greeting}
           </Typography>
           <Box className="dark-mode-surface" sx={{ mb: 3, p: 2.5, borderRadius: 3, background: 'linear-gradient(135deg, #eef6ff 0%, #f8fbff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
             <Box>
