@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { readStoredArray } from '../utils/browserStorage';
+import { readStoredArray, readStoredValue, writeStoredValue } from '../utils/browserStorage';
 import { getDateKey, getMonthKey, getMonthWeekKeys, getNextStreak, getWeekStartKey } from '../utils/appDates';
 
 const initialGamification = {
@@ -11,20 +11,28 @@ const initialGamification = {
 
 // Own shared savings, expense, challenge, leaderboard, and achievement data.
 const useAppData = () => {
-  const [goal, setGoal] = useState(5000);
-  const [expenses, setExpenses] = useState([]);
-  const [goals, setGoals] = useState([]);
-  const [leaderboardEntries, setLeaderboardEntries] = useState([]);
-  const [gamification, setGamification] = useState(initialGamification);
+  const [goal, setGoal] = useState(() => readStoredValue('zave-goal', 5000));
+  const [expenses, setExpenses] = useState(() => readStoredArray('zave-expenses'));
+  const [goals, setGoals] = useState(() => readStoredArray('zave-goals'));
+  const [leaderboardEntries, setLeaderboardEntries] = useState(() => readStoredArray('zave-leaderboard-entries'));
+  const [gamification, setGamification] = useState(() => ({
+    ...initialGamification,
+    ...readStoredValue('zave-gamification', {}),
+  }));
 
   // Persist challenge history used by monthly achievement checks and custom challenges.
   const [completedChallengeWeeks, setCompletedChallengeWeeks] = useState(() => readStoredArray('zave-completed-challenge-weeks'));
   const [customChallenges, setCustomChallenges] = useState(() => readStoredArray('zave-custom-challenges'));
 
   useEffect(() => {
-    localStorage.setItem('zave-completed-challenge-weeks', JSON.stringify(completedChallengeWeeks));
-    localStorage.setItem('zave-custom-challenges', JSON.stringify(customChallenges));
-  }, [completedChallengeWeeks, customChallenges]);
+    writeStoredValue('zave-goal', goal);
+    writeStoredValue('zave-expenses', expenses);
+    writeStoredValue('zave-goals', goals);
+    writeStoredValue('zave-leaderboard-entries', leaderboardEntries);
+    writeStoredValue('zave-gamification', gamification);
+    writeStoredValue('zave-completed-challenge-weeks', completedChallengeWeeks);
+    writeStoredValue('zave-custom-challenges', customChallenges);
+  }, [goal, expenses, goals, leaderboardEntries, gamification, completedChallengeWeeks, customChallenges]);
 
   // Savings totals include goal balances and the saved portion of each expense.
   const totalSavedAmount = goals.reduce((sum, savingsGoal) => (
