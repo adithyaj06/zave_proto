@@ -5,6 +5,8 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import LinearProgress from '@mui/material/LinearProgress';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import DiamondIcon from '@mui/icons-material/Diamond';
@@ -12,6 +14,10 @@ import ProgressBar from '../components/ProgressBar';
 import SavingsMeter from '../components/SavingsMeter';
 import LeaderboardTab from '../components/LeaderboardTab';
 import ExpensePieChart from '../components/ExpensePieChart';
+
+const getLocalDateKey = (date) => (
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+);
 
 /**
  * DashboardPage
@@ -25,7 +31,7 @@ import ExpensePieChart from '../components/ExpensePieChart';
  * - `onAddExpense`: callback to add an expense
  * - `gamification`, `points`, `level`, `xpToNextLevel`, `totalSavedAmount`: summary values
  */
-const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level, xpToNextLevel, leaderboardEntries = [] }) => {
+const DashboardPage = ({ goal, goals = [], expenses, savingsContributions = [], gamification, points, level, xpToNextLevel, leaderboardEntries = [] }) => {
   // Local UI state: which category is selected for charts/bars
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [timeRange, setTimeRange] = useState('month');
@@ -43,40 +49,69 @@ const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level
     sum + (Number(expense.savedAmount ?? (Number(expense.amount) || 0) * 0.3) || 0)
   ), 0);
 
-  // Static growth-over-time datasets used for the chart below.
-  // Replace these with real time-series data when a backend/history source is available.
-  const growthData = {
-    week: {
-      labels: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'],
-      values: [4200, 4240, 4215, 4280, 4310, 4345],
-    },
-    month: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      values: [9600, 9720, 9685, 9810, 9890, 9975],
-    },
-    year: {
-      labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
-      values: [32000, 32400, 32250, 32800, 33150, 33500],
-    },
-  };
-
-  const growth = growthData[timeRange];
-  const growthMin = Math.min(...growth.values);
-  const growthMax = Math.max(...growth.values);
-  const growthRange = growthMax - growthMin || 1;
-  const growthPoints = growth.values
+  const today = new Date();
+  const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  const periodBuckets = timeRange === 'week'
+    ? Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(weekStart);
+        date.setDate(date.getDate() + index);
+        return { key: getLocalDateKey(date), label: date.toLocaleDateString(undefined, { weekday: 'short' }) };
+      })
+    : timeRange === 'month'
+      ? Array.from({ length: new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate() }, (_, index) => {
+          const date = new Date(today.getFullYear(), today.getMonth(), index + 1);
+          return { key: getLocalDateKey(date), label: String(index + 1) };
+        })
+      : Array.from({ length: 12 }, (_, index) => ({
+          key: `${today.getFullYear()}-${String(index + 1).padStart(2, '0')}`,
+          label: new Date(today.getFullYear(), index, 1).toLocaleDateString(undefined, { month: 'short' }),
+        }));
+  const savingsEvents = [
+    ...expenses.map((expense) => ({
+      date: expense.date,
+      amount: Number(expense.savedAmount ?? (Number(expense.amount) || 0) * 0.3) || 0,
+    })),
+    ...savingsContributions,
+  ];
+  const savingsByPeriod = savingsEvents.reduce((totals, event) => {
+    if (!event.date) return totals;
+    const date = new Date(`${event.date}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return totals;
+    const key = timeRange === 'year'
+      ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      : getLocalDateKey(date);
+    const saved = Number(event.amount) || 0;
+    totals.set(key, (totals.get(key) || 0) + saved);
+    return totals;
+  }, new Map());
+  let runningSavings = 0;
+  const growthValues = periodBuckets.map(({ key }) => {
+    runningSavings += savingsByPeriod.get(key) || 0;
+    return runningSavings;
+  });
+  const growthMax = Math.max(...growthValues, 1);
+  const growthPoints = growthValues
     .map((value, index) => {
-      const x = 24 + (index / (growth.values.length - 1)) * 552;
-      const y = 124 - ((value - growthMin) / growthRange) * 92;
+      const x = 24 + (index / Math.max(growthValues.length - 1, 1)) * 552;
+      const y = 124 - (value / growthMax) * 92;
       return `${x},${y}`;
     })
     .join(' ');
+  const growthLabelIndexes = [...new Set([
+    0,
+    Math.floor((periodBuckets.length - 1) / 4),
+    Math.floor((periodBuckets.length - 1) / 2),
+    Math.floor(((periodBuckets.length - 1) * 3) / 4),
+    periodBuckets.length - 1,
+  ])];
+  const hasPeriodSavings = growthValues.some((value) => value > 0);
 
   const medalTiers = [
     { name: 'Bronze', icon: EmojiEventsIcon, color: '#b87333', minLevel: 1 },
     { name: 'Silver', icon: EmojiEventsIcon, color: '#c0c0c0', minLevel: 10 },
-    { name: 'Gold', icon: EmojiEventsIcon, color: '#d4af37', minLevel: 20 },
-    { name: 'Diamond', icon: DiamondIcon, color: '#5eead4', minLevel: 30 },
+    { name: 'Gold', icon: EmojiEventsIcon, color: '#d4af37', minLevel: 30 },
+    { name: 'Diamond', icon: DiamondIcon, color: '#5eead4', minLevel: 50 },
   ];
 
   const currentMedalIndex = medalTiers.reduce((index, tier, idx) => (level >= tier.minLevel ? idx : index), 0);
@@ -130,7 +165,7 @@ const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(100, ((points % 1000) / 1000) * 100)}
-                    sx={{ width: '82%', marginLeft: '2%', height: 6, borderRadius: 999, maxWidth: '100%' }}
+                    sx={{ width: 'calc(100% - 24px)', mx: 'auto', height: 6, borderRadius: 999 }}
                   />
                 </Box>
                 <Box
@@ -157,7 +192,7 @@ const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level
             <SavingsMeter current={savings} goal={goal} />
             {/* Savings Buckets */}
             <Card variant="outlined" sx={{ borderRadius: 4, p: 2 }}>
-              <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
                  Buckets
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexWrap: 'wrap' }}>
@@ -168,9 +203,9 @@ const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level
 
                   return (
                     <Card key={g.id} variant="outlined" sx={{ minWidth: 0, flex: '1 1 180px', borderRadius: 4, p: 2 }}>
-                      <Typography fontWeight={700}>{g.title}</Typography>
+                      <Typography fontWeight={500}>{g.title}</Typography>
                       <Typography variant="caption" color="text.secondary">Saved ₹{saved.toLocaleString()} of ₹{target.toLocaleString()}</Typography>
-                      <LinearProgress variant="determinate" value={pct} sx={{ width: '82%', marginLeft: '2%', height: 6, borderRadius: 999, mt: 1.5, maxWidth: '100%' }} />
+                      <LinearProgress variant="determinate" value={pct} sx={{ width: 'calc(100% - 24px)', mx: 'auto', height: 6, borderRadius: 999, mt: 1.5 }} />
                     </Card>
                   );
                 })}
@@ -185,35 +220,56 @@ const DashboardPage = ({ goal, goals = [], expenses, gamification, points, level
                 <Typography variant="subtitle1" fontWeight={700}>
                   My Progress
                 </Typography>
-                <Box component="select" value={timeRange} onChange={(event) => setTimeRange(event.target.value)} sx={{ border: '1px solid #dbeafe', borderRadius: 1.5, px: 1.5, py: 0.75, fontSize: 14, background: '#fff', color: 'text.primary' }}>
-                  <option value="week">Weekly</option>
-                  <option value="month">Monthly</option>
-                  <option value="year">Yearly</option>
-                </Box>
+                <Select
+                  value={timeRange}
+                  onChange={(event) => setTimeRange(event.target.value)}
+                  inputProps={{ 'aria-label': 'Progress duration' }}
+                  MenuProps={{ PaperProps: { sx: { borderRadius: '8px', mt: 0.5 } } }}
+                  sx={{
+                    minWidth: 104,
+                    height: 34,
+                    borderRadius: 1.5,
+                    border: '1px solid #dbeafe',
+                    backgroundColor: '#fff',
+                    color: 'text.primary',
+                    fontSize: 14,
+                    '& .MuiOutlinedInput-notchedOutline': { border: 0 },
+                    '& .MuiSelect-select': { py: 0.75, pl: 1.5, pr: '2rem' },
+                  }}
+                >
+                  <MenuItem value="week">Weekly</MenuItem>
+                  <MenuItem value="month">Monthly</MenuItem>
+                  <MenuItem value="year">Yearly</MenuItem>
+                </Select>
               </Box>
               <Box sx={{ width: '100%' }}>
                 <svg viewBox="0 0 600 150" width="100%" height="150" role="img" aria-label="Savings progress line graph" preserveAspectRatio="none">
                   {[32, 78, 124].map((y) => (
                     <line key={y} x1="24" x2="576" y1={y} y2={y} stroke="currentColor" strokeOpacity="0.1" />
                   ))}
-                  <polyline
-                    points={growthPoints}
-                    fill="none"
-                    stroke="#1976d2"
-                    strokeWidth="4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  {growth.values.map((value, index) => {
-                    const [cx, cy] = growthPoints.split(' ')[index].split(',');
-                    return <circle key={value} cx={cx} cy={cy} r="5" fill="#fff" stroke="#1976d2" strokeWidth="3" />;
-                  })}
+                  {hasPeriodSavings && (
+                    <polyline
+                      points={growthPoints}
+                      fill="none"
+                      stroke="#1976d2"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
                 </svg>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', px: 1.5 }}>
-                  {growth.labels.map((label) => (
-                    <Typography key={label} variant="caption" color="text.secondary">{label}</Typography>
+                  {growthLabelIndexes.map((index) => (
+                    <Typography key={periodBuckets[index].key} variant="caption" color="text.secondary">
+                      {periodBuckets[index].label}
+                    </Typography>
                   ))}
                 </Box>
+                {!hasPeriodSavings && (
+                  <Typography variant="caption" color="text.secondary">
+                    No saved expense data for this period.
+                  </Typography>
+                )}
               </Box>
             </Card>
             <LeaderboardTab entries={leaderboardEntries} />

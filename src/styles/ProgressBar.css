@@ -1,7 +1,7 @@
 .expenses-bar-card {
   background: #f8fbff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 26px;
   padding: 1rem 1.1rem;
 }
 
@@ -23,15 +23,6 @@
   margin: 0;
   font-size: 0.9rem;
   color: #64748b;
-}
-
-.category-select {
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  padding: 0.5rem 0.8rem;
-  background: #fff;
-  color: #0f172a;
-  font-weight: 600;
 }
 
 .progress-bar-container {

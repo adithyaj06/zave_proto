@@ -1,4 +1,6 @@
 import React from 'react';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import '../styles/ProgressBar.css';
 
 const categories = ['All', 'Food', 'Entertainment', 'Travel', 'Rent', 'Misc'];
@@ -27,17 +29,27 @@ const ProgressBar = ({ expenses = [], selectedCategory = 'All', onCategoryChange
         <div>
           <h4>Expense breakdown</h4>
         </div>
-        <select
+        <Select
           className="category-select"
           value={selectedCategory}
           onChange={(event) => onCategoryChange(event.target.value)}
+          inputProps={{ 'aria-label': 'Expense category filter' }}
+          MenuProps={{ PaperProps: { sx: { borderRadius: '8px', mt: 0.5 } } }}
+          sx={{
+            minWidth: 118,
+            height: 36,
+            borderRadius: 999,
+            backgroundColor: '#fff',
+            color: '#0f172a',
+            fontWeight: 600,
+            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' },
+            '& .MuiSelect-select': { py: '0.5rem', pl: '0.8rem', pr: '2rem' },
+          }}
         >
           {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
+            <MenuItem key={category} value={category}>{category}</MenuItem>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="progress-bar-container">

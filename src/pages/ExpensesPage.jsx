@@ -6,10 +6,14 @@ import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InputExpensesTab from '../components/InputExpensesTab';
 
-const ExpensesPage = ({ expenses = [], goals = [], onAddExpense, onAddSavingsContribution }) => {
+const ExpensesPage = ({ expenses = [], goals = [], onAddExpense, onDeleteExpense, onAddSavingsContribution }) => {
   const [selectedGoalId, setSelectedGoalId] = useState('');
   const [savingsAmount, setSavingsAmount] = useState('');
   const totalSpent = expenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -54,13 +58,13 @@ const ExpensesPage = ({ expenses = [], goals = [], onAddExpense, onAddSavingsCon
                     label="Savings bucket"
                     value={selectedGoalId}
                     onChange={(event) => setSelectedGoalId(event.target.value)}
-                    SelectProps={{ native: true }}
+                    SelectProps={{ MenuProps: { PaperProps: { sx: { borderRadius: '8px', mt: 0.5 } } } }}
                     required
                     fullWidth
                   >
-                    <option aria-label="Choose a savings bucket" value="" />
+                    <MenuItem value="" sx={{ display: 'none' }} />
                     {goals.map((goalItem) => (
-                      <option key={goalItem.id} value={goalItem.id}>{goalItem.title}</option>
+                      <MenuItem key={goalItem.id} value={goalItem.id}>{goalItem.title}</MenuItem>
                     ))}
                   </TextField>
                   <TextField
@@ -93,7 +97,7 @@ const ExpensesPage = ({ expenses = [], goals = [], onAddExpense, onAddSavingsCon
             <Stack spacing={1.5}>
               {expenses.map((expense, index) => (
                 <React.Fragment key={`${expense.category}-${index}`}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, py: 1 }}>
                     <Stack>
                       <Typography fontWeight={700}>{expense.category || 'General'}</Typography>
                       <Typography variant="body2" color="text.secondary">
@@ -103,9 +107,21 @@ const ExpensesPage = ({ expenses = [], goals = [], onAddExpense, onAddSavingsCon
                         Saved ₹{Number(expense.savedAmount ?? (Number(expense.amount) || 0) * 0.3).toLocaleString()}
                       </Typography>
                     </Stack>
-                    <Typography fontWeight={700} color="primary.main">
-                      ₹{Number(expense.amount || 0).toLocaleString()}
-                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography fontWeight={700} color="primary.main">
+                        ₹{Number(expense.amount || 0).toLocaleString()}
+                      </Typography>
+                      <Tooltip title="Delete expense">
+                        <IconButton
+                          aria-label={`Delete ${expense.category || 'expense'} expense`}
+                          color="error"
+                          onClick={() => onDeleteExpense?.(index)}
+                          size="small"
+                        >
+                          <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
                   </Box>
                   {index < expenses.length - 1 && <Divider />}
                 </React.Fragment>

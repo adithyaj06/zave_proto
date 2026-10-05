@@ -27,6 +27,7 @@ const AppRoutes = ({ themeMode, onThemeChange, data }) => (
                 goal={data.goal}
                 goals={data.goals}
                 expenses={data.expenses}
+                savingsContributions={data.savingsContributions}
                 onAddExpense={data.handleAddExpense}
                 gamification={data.gamification}
                 points={data.points}
@@ -41,6 +42,7 @@ const AppRoutes = ({ themeMode, onThemeChange, data }) => (
                 expenses={data.expenses}
                 goals={data.goals}
                 onAddExpense={data.handleAddExpense}
+                onDeleteExpense={data.handleDeleteExpense}
                 onAddSavingsContribution={data.handleAddSavingsContribution}
               />
             )} />

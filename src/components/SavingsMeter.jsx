@@ -26,9 +26,6 @@ const SavingsMeter = ({ current = 0, goal = 5000 }) => {
       <Box sx={{ width: '100%', mb: 1 }}>
         <LinearProgress variant="determinate" value={percent} color="success" sx={{ height: 14, borderRadius: 1 }} />
       </Box>
-      <Typography variant="body2" align="right" color="success.dark" fontWeight={600}>
-        {percent}% of goal
-      </Typography>
     </Box>
   );
 };

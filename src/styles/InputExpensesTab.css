@@ -8,8 +8,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 14px;
 }
-.input-expenses-tab input,
-.input-expenses-tab select {
+.input-expenses-tab input {
   padding: 0.7rem 0.8rem;
   border: 1px solid #cbd5e1;
   border-radius: 10px;

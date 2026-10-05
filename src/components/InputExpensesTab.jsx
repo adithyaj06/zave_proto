@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import '../styles/InputExpensesTab.css';
 
 const categories = ['Food', 'Entertainment', 'Travel', 'Rent', 'Misc'];
@@ -43,13 +46,27 @@ const InputExpensesTab = ({ onAddExpense }) => {
         step="0.01"
       />
 
-      <select value={category} placeholder="Category" onChange={e => setCategory(e.target.value)} required>
-        {categories.map((item) => (
-          <option key={item} value={item}>
-            {item}
-          </option>
-        ))}
-      </select>
+      <FormControl sx={{ minWidth: 160 }}>
+        <Select
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+          inputProps={{ 'aria-label': 'Category' }}
+          MenuProps={{ PaperProps: { sx: { borderRadius: '8px', mt: 0.5 } } }}
+          sx={{
+            height: 42,
+            borderRadius: '10px',
+            backgroundColor: '#fff',
+            color: '#000',
+            fontWeight: 500,
+            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#cbd5e1' },
+            '& .MuiSelect-select': { padding: '0.7rem 0.8rem' },
+          }}
+        >
+          {categories.map((item) => (
+            <MenuItem key={item} value={item}>{item}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <button type="submit">Add Expense</button>
     </form>
   );

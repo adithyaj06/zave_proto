@@ -14,6 +14,7 @@ const useAppData = () => {
   const [goal, setGoal] = useState(() => readStoredValue('zave-goal', 5000));
   const [expenses, setExpenses] = useState(() => readStoredArray('zave-expenses'));
   const [goals, setGoals] = useState(() => readStoredArray('zave-goals'));
+  const [savingsContributions, setSavingsContributions] = useState(() => readStoredArray('zave-savings-contributions'));
   const [leaderboardEntries, setLeaderboardEntries] = useState(() => readStoredArray('zave-leaderboard-entries'));
   const [gamification, setGamification] = useState(() => ({
     ...initialGamification,
@@ -28,11 +29,12 @@ const useAppData = () => {
     writeStoredValue('zave-goal', goal);
     writeStoredValue('zave-expenses', expenses);
     writeStoredValue('zave-goals', goals);
+    writeStoredValue('zave-savings-contributions', savingsContributions);
     writeStoredValue('zave-leaderboard-entries', leaderboardEntries);
     writeStoredValue('zave-gamification', gamification);
     writeStoredValue('zave-completed-challenge-weeks', completedChallengeWeeks);
     writeStoredValue('zave-custom-challenges', customChallenges);
-  }, [goal, expenses, goals, leaderboardEntries, gamification, completedChallengeWeeks, customChallenges]);
+  }, [goal, expenses, goals, savingsContributions, leaderboardEntries, gamification, completedChallengeWeeks, customChallenges]);
 
   // Savings totals include goal balances and the saved portion of each expense.
   const totalSavedAmount = goals.reduce((sum, savingsGoal) => (
@@ -41,10 +43,10 @@ const useAppData = () => {
     sum + (Number(expense.savedAmount ?? (Number(expense.amount) || 0) * 0.3) || 0)
   ), 0);
 
-  // Award 10 XP per complete ₹100 saved, with 100 XP required for each level.
+  // Award 10 XP per complete ₹100 saved, with 1,000 XP required for each level.
   const points = Math.floor(totalSavedAmount / 100) * 10;
-  const level = Math.floor(points / 100) + 1;
-  const xpToNextLevel = 100 - (points % 100);
+  const level = Math.floor(points / 1000) + 1;
+  const xpToNextLevel = 1000 - (points % 1000);
 
   // Derive period-specific values once so pages and handlers share the same calendar boundaries.
   const currentMonthKey = getMonthKey();
@@ -101,6 +103,10 @@ const useAppData = () => {
     }
   };
 
+  const handleDeleteExpense = (expenseIndex) => {
+    setExpenses((previous) => previous.filter((_, index) => index !== expenseIndex));
+  };
+
   const handleAddCustomChallenge = (challenge) => {
     setCustomChallenges((previous) => [
       ...previous,
@@ -128,6 +134,7 @@ const useAppData = () => {
     )));
 
     const today = getDateKey();
+    setSavingsContributions((previous) => [...previous, { date: today, amount }]);
     const nextStreak = getNextStreak(gamification, today);
     setGamification((previous) => ({
       ...previous,
@@ -151,6 +158,7 @@ const useAppData = () => {
     setGoal,
     goals,
     expenses,
+    savingsContributions,
     leaderboardEntries,
     gamification,
     points,
@@ -160,6 +168,7 @@ const useAppData = () => {
     earnedBadges,
     weeklyChallenges,
     handleAddExpense,
+    handleDeleteExpense,
     handleAddCustomChallenge,
     handleAdvanceCustomChallenge,
     handleAddGoal,
